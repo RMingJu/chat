@@ -1,81 +1,188 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿@{ ViewBag.Title = "Home Page"; }
+
+
+
 <style>
     .hello {
         color: red;
     }
 </style>
+
+<!-- 內容CSS -->
+<style>
+    body {
+        margin: 0 auto;
+        max-width: 800px;
+        padding: 0 20px;
+    }
+    
+    .container {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .darker {
+        border-color: #ccc;
+        background-color: #ddd;
+    }
+    
+    .container::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
+    
+    .container .avatar {
+        float: left;
+        max-width: 60px;
+        width: 100%;
+        margin-right: 20px;
+        border-radius: 50%;
+    }
+    
+    .container .avatar.right {
+        float: right;
+        margin-left: 20px;
+        margin-right: 0;
+    }
+    
+    .timeRight {
+        float: right;
+        color: #aaa;
+    }
+    
+    .timeLeft {
+        float: left;
+        color: #999;
+    }
+</style>
+
+
+<script>
+    myObject = new Vue({
+        el: '#app',
+        data: {
+            todos: [{
+                myMessage: false,
+                userID: 'mark',
+                type: 'user',
+                img: '/w3images/bandmember.jpg',
+                text: 'Hello. How are you today?',
+                time: '11:00'
+            }, {
+                myMessage: true,
+                userID: 'mary',
+                type: 'user',
+                img: '/w3images/avatar_g2.jpg',
+                text: "Hey! I'm fine. Thanks for asking!",
+                time: '11:01'
+            }, {
+                myMessage: false,
+                userID: 'mark',
+                type: 'user',
+                img: '/w3images/bandmember.jpg',
+                text: "Sweet! So, what do you wanna do today?",
+                time: '11:02'
+            }, {
+                myMessage: true,
+                userID: 'mary',
+                type: 'user',
+                img: '/w3images/avatar_g2.jpg',
+                text: "Nah, I dunno. Play soccer.. or learn more coding perhaps?",
+                time: '11:03'
+            }]
+        },
+        computed: {
+            isMyMessage: function(userID) {
+                return true;
+            }
+        }
+    })
+</script>
+
+
 <div class="jumbotron">
-    <h1>聊天室</h1>
+    <h3>同學你哪位?</h3>
 </div>
 
 @section scripts {
-    <script src="~/Scripts/jquery.signalR-2.3.0.min.js"></script>
-    <script src="~/signalr/hubs"></script>
-    <script>
-        $(function () {
-            var userID = $("#name").val();
-            while (userID.length == 0) {
-                userID = window.prompt("請輸入使用者名稱");
-                if (!userID)
-                    userID = "";
-            }
-            $("#name").val(userID);
-            var testHub = $.connection.testHubs;
-            testHub.client.addNewMessageToPage = function (name, message) {
-                $('#discussion').append('<li><strong>' + htmlEncode(name)
-                    + '</strong>: ' + htmlEncode(message) + '</li>');
-                };
-            testHub.client.hello = function (message) {
-                    $("#discussion").append("<li class='hello'>" + message + "</li");
-                };
-            $('#message').focus();
-
-            //打開連線
-            $.connection.hub.start().done(function () {
-                testHub.server.hello(userID);
-                $('#sendmessage').click(function () {
-                    testHub.server.send($('#name').val(), $('#message').val());
-                    $('#message').val('').focus();
-                });
-            });
-            
-        });
-        //鍵盤enter傳送訊息
-        var input = document.getElementById("message");
-        input.addEventListener("keyup", function (event) {
-            event.preventDefault();
-            if (event.keyCode === 13) {
-                document.getElementById("sendmessage").click();
-            }
-        });
-
-
-
-        function htmlEncode(value) {
-            var encodedValue = $('<div />').text(value).html();
-            return encodedValue;
+<script src="~/Scripts/jquery.signalR-2.3.0.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script>
+    $(function() {
+        var userID = $("#name").val();
+        while (userID.length == 0) {
+            userID = window.prompt("請輸入使用者名稱");
+            if (!userID)
+                userID = "";
         }
-    </script>
+        $("#name").val(userID);
+        var testHub = $.connection.testHubs;
+        testHub.client.addNewMessageToPage = function(name, message) {
+            $('#discussion').append('<li><strong>' + htmlEncode(name) +
+                '</strong>: ' + htmlEncode(message) + '</li>');
+        };
+        testHub.client.hello = function(message) {
+            $("#discussion").append("<li class='hello'>" + message + "</li");
+        };
+        $('#message').focus();
+
+        //打開連線
+        $.connection.hub.start().done(function() {
+            testHub.server.hello(userID);
+            $('#sendmessage').click(function() {
+                testHub.server.send($('#name').val(), $('#message').val());
+                $('#message').val('').focus();
+            });
+        });
+
+    });
+    //鍵盤enter傳送訊息
+    var input = document.getElementById("message");
+    input.addEventListener("keyup", function(event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            document.getElementById("sendmessage").click();
+        }
+    });
+
+
+
+    function htmlEncode(value) {
+        var encodedValue = $('<div />').text(value).html();
+        return encodedValue;
+    }
+</script>
 }
+
+
+<h2>vue</h2>
+<input type="text" id="userID" value="mark">
+<div id="app">
+    <template v-for="x in todos">
+            <div class="container" v-bind:class="{ darker:x.myMessage}">
+                <img v-bind:src=x.img class="avatar"  :class="{right: x.myMessage}"  alt="Avatar" style="width:100%;">
+                <p>{{x.text}}</p>
+                <span :class="{timeRight: !x.myMessage,timeLeft: x.myMessage}">{{x.time}}</span>
+            </div>
+        </template>
+</div>
 
 <div class="row">
     <div class="col-md-4">
-        <h2>123123123</h2>
+        <h2>猜猜我是誰</h2>
         <div class="container">
             <ul id="discussion"></ul>
             <input type="text" style="display:none;" id="name" class="form-control" placeholder="姓名" />
             <input type="text" id="message" class="form-control" placeholder="輸入內容" />
             <input type="button" id="sendmessage" value="Send" class="btn btn-primary" />
         </div>
-
-
-
-
     </div>
     <div class="col-md-4">
-      
+
     </div>
     <div class="col-md-4">
 
